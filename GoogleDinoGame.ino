@@ -1,3 +1,16 @@
+#define DINO_GRAVITY 0.195
+#define DINO_GROUND 40  //px
+
+bool dino_feet;
+bool dino_move_direction;
+byte dino_height;
+byte prev_dino_height;
+bool roached;
+int8_t enemy_pos = -10;
+bool enemy_type;
+byte active_enemy_id;  //1 - small cactus; 2 - big cactus; 3 - bird
+float dino_speed;
+
 void google_dino()
 {
   uint32_t dino_step_timer;
@@ -34,16 +47,9 @@ void google_dino()
       {
         oled.drawBitmap(5, dino_height + 8, dino_feet ? dino_roached_left : dino_roached_right, 16, 8, BITMAP_NORMAL);
       }
-      if (dino_height != prev_dino_height)
-      {
-        prev_dino_height = dino_height;
-        //oled.clear(5, dino_height - 16, 21, dino_height);  //0, 30, 20, 63 for dino
-        oled.clear(5, dino_height, 5 + 16, dino_height + 16);
-        if (dino_height == BOTTOM_HEIGHT)
-        {
-          oled.drawBitmap(0, 60, dino_way, 128, 1);
-        }
-      }
+
+      oled.drawBitmap(0, DINO_GROUND+17, dino_way, 128, 1);
+
       oled.update();
     }
     if (millis() - dino_step_timer >= 100)
@@ -51,7 +57,7 @@ void google_dino()
       dino_step_timer = millis();
       dino_feet = !dino_feet;
     }
-
+/*
     if (millis() - temp_enemy_timer >= 33)
     {
       temp_enemy_timer = millis();
@@ -61,8 +67,6 @@ void google_dino()
       {
         enemy_pos = 130;
       }
-      //oled.clear();
-      //enemy_pos = 130;
       switch (enemy_type)
       {
         case true:
@@ -79,7 +83,8 @@ void google_dino()
       enemy_timer = millis();
       enemy_pos--;
     }
-
+    */
+/*
     if (millis() - dino_jump_timer >= 7)
     {
       dino_jump_timer = millis();
@@ -96,16 +101,19 @@ void google_dino()
         dino_height++;
       }
     }
-
-    if ((up.pressing()) && dino_height == BOTTOM_HEIGHT)
+*/
+    if (up.click() && dino_height == DINO_GROUND)
     {
-      //Serial.println(F("Up"));
-      dino_jump_timer = millis();
-      dino_move_direction = true;
+      dino_speed = -2.2;
+      dino_height -= 4;
+    }
+    else if ((up.holding()) && dino_height == DINO_GROUND)
+    {
+      dino_speed = -2.8;
+      dino_height -= 4;
     }
     if (down.pressing())
     {
-      //Serial.println(F("Down"));
       roached = true;
       oled.clear(5, dino_height, 5 + 16, dino_height + 16);
       oled.drawBitmap(0, 60, dino_way, 128, 1);
@@ -116,6 +124,17 @@ void google_dino()
     {
       roached = false;
     }
-    //Serial.println(enemy_pos);
+
+    if (millis() - dino_jump_timer >= 15)
+    {
+      dino_jump_timer = millis();
+      dino_speed += (float)DINO_GRAVITY;
+      dino_height += (float)dino_speed;
+      if (dino_height >= DINO_GROUND)
+      {
+        dino_height = DINO_GROUND;
+        dino_speed = 0.0;
+      }
+    }
   }
 }

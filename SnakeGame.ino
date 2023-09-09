@@ -940,24 +940,26 @@ const uint8_t game_over[] PROGMEM = {
     0x00,
 };  //71x41
 
-int length = 10;
-byte posX, posY;
-byte apple_posX = random(10, 119), apple_posY = random(20, 55);
-byte direction = 1;  // 1 - right; 2 - left; 3 - down; 4 - up
+int length = 30;
+int posX, posY;
+int apple_posX = random(10, 119), apple_posY = random(20, 55);
+int direction = 1;  // 1 - right; 2 - left; 3 - down; 4 - up
 int head_posX = 0, tail_posX = 0;
 int head_posY = 11, tail_posY = 0;
 
 //byte posX_arr[129] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 //byte posY_arr[129] = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
 
-byte turn_pos_arr[2][100];  //[a][b] a - x/y; b - turn num;
-byte snake_poss_arr[3][450];  // [a][b] a - x/y; b - dot amount;
-byte oldest_snake_pos_id = 99;
+int turn_pos_arr[2][100];  //[a][b] a - x/y; b - turn num;
+int snake_pos_arr[2][450];  // [a][b] a - x/y; b - dot amount;
+//int snake_pos_y_arr[450];
+//int snake_pos_x_arr[450];
+int oldest_snake_pos_id = 99;
 int tail_dir = 1;  // 1 - right; 2 - left; 3 - down; 4 - up
 bool allow_next_click = true;
-byte next_tail_dir[100];
-byte turn_amount;
-byte turn_array_id;
+int next_tail_dir[100];
+int turn_amount;
+int turn_array_id;
 bool allow_clear_tail = true;
 bool snake_died = false;
 int hi_snake_skore = 32;
@@ -970,39 +972,41 @@ void snake()
   snake_died = false;
   direction = 1;
 
-  byte rewrite_id = 0;
-  snake_poss_arr[0][0] = 90;
-  snake_poss_arr[0][rewrite_id++] = 89;
-  snake_poss_arr[0][rewrite_id++] = 88;
-  snake_poss_arr[0][rewrite_id++] = 87;
-  snake_poss_arr[0][rewrite_id++] = 86;
-  snake_poss_arr[0][rewrite_id++] = 85;
-  snake_poss_arr[0][rewrite_id++] = 84;
-  snake_poss_arr[0][rewrite_id++] = 83;
-  snake_poss_arr[0][rewrite_id++] = 82;
-  snake_poss_arr[0][rewrite_id++] = 81;
+  tail_posX = 10;
+  tail_posY = 20;
+  head_posX = 20;
+  head_posY = 20;
 
-  rewrite_id = 0;
-  snake_poss_arr[1][0] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
-  snake_poss_arr[1][rewrite_id++] = 40;
+  /*
+  byte write_id = 0;
+  snake_pos_x_arr[write_id] = 10;
+  snake_pos_x_arr[write_id++] = 11;
+  snake_pos_x_arr[write_id++] = 12;
+  snake_pos_x_arr[write_id++] = 13;
+  snake_pos_x_arr[write_id++] = 14;
+  snake_pos_x_arr[write_id++] = 15;
+  snake_pos_x_arr[write_id++] = 16;
+  snake_pos_x_arr[write_id++] = 17;
+  snake_pos_x_arr[write_id++] = 18;
+  snake_pos_x_arr[write_id++] = 19;
 
-  tail_posX = 81;
-  tail_posY = 40;
-  head_posX = 90;  //11
-  head_posY = 40;
+  write_id = 0;
+  snake_pos_y_arr[write_id] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  snake_pos_y_arr[write_id++] = 30;
+  */
 
   oled.clear();
   oled.roundRect(0, 9, 127, 40, OLED_STROKE);
   oled.setCursorXY(20, 45);
-  oled.print(F("BEST SCORE:"));
+  oled.print("BEST SCORE : ");
   oled.print(hi_snake_skore);
   oled.setScale(1);
   oled.setCursor(3, 7);
@@ -1036,19 +1040,20 @@ void snake()
       snake_died = false;
       break;
     }
+    /*
     if (left.click())
     {
       menu();
       return;
       break;
     }
+    */
   }
 
   while (true)
   {
     //Serial.println(mode);
     buttons_tick();
-    pause = false;
 
     if (ok.click())
     {
@@ -1058,14 +1063,16 @@ void snake()
     {
       pause = false;
     }
+    /*
     if (left.click() && pause == true)
     {
       menu;
       return;
       break;
     }
+    */
 
-    if (millis() - refresh_timer >= 1000 / REFRESH_RATE)  //1000 / REFRESH_RATE
+    if (millis() - refresh_timer >= 1000 / 30)  //1000 / REFRESH_RATE
     {
       //draw_battery(75);
       oled.clear();
@@ -1106,16 +1113,13 @@ void snake()
 
       oled.dot(apple_posX, apple_posY, 1);
 
-      for (int id = 0; id < length; id++)
+      for (int id = 0; id < 400; id++)
       {
-        oled.dot(snake_poss_arr[0][id], snake_poss_arr[1][id], 1);
+        oled.dot(snake_pos_arr[0][id], snake_pos_arr[1][id], 1);
       }
       oled.update();
     }
 
-    Serial.print(snake_poss_arr[0][0]);
-    Serial.print(", ");
-    Serial.println(snake_poss_arr[1][0]);
     if (head_posX == apple_posX && head_posY == apple_posY)
     {
       allow_clear_tail = false;
@@ -1131,18 +1135,8 @@ void snake()
       //direction = 1;
       if (direction == 1 && head_posX < 127)
       {
-        for (byte id = 0; id < 2; id++)
-        {
-          for (byte id2 = length; id2 > 0; id2--)
-          {
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-          }
-        }
         head_posX++;
-        snake_poss_arr[0][0] = head_posX;
-        snake_poss_arr[1][0] = head_posY;
-
+        move_pos_array();
         //Serial.println(head_posX);
 
         if (allow_clear_tail == true)
@@ -1166,18 +1160,8 @@ void snake()
       }
       if (direction == 3 && head_posY < 63)
       {
-        for (byte id = 0; id < 2; id++)
-        {
-          for (byte id2 = length; id2 > 0; id2--)
-          {
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-          }
-          snake_poss_arr[id][length + 1] = 128;
-        }
         head_posY++;
-        snake_poss_arr[0][0] = head_posX;
-        snake_poss_arr[1][0] = head_posY;
+        move_pos_array();
 
         if (allow_clear_tail == true)
         {
@@ -1201,18 +1185,8 @@ void snake()
 
       if (direction == 2 && head_posX > 0)
       {
-        for (byte id = 0; id < 2; id++)
-        {
-          for (byte id2 = length; id2 > 0; id2--)
-          {
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-          }
-          snake_poss_arr[id][length + 1] = 128;
-        }
         head_posX--;
-        snake_poss_arr[0][0] = head_posX;
-        snake_poss_arr[1][0] = head_posY;
+        move_pos_array();
 
         if (allow_clear_tail == true)
         {
@@ -1236,17 +1210,8 @@ void snake()
 
       if (direction == 4 && head_posY > 10)
       {
-        for (byte id = 0; id < 2; id++)
-        {
-          for (byte id2 = length; id2 > 0; id2--)
-          {
-            snake_poss_arr[id][id2] = snake_poss_arr[id][id2 - 1];
-          }
-          snake_poss_arr[id][length + 1] = 128;
-        }
         head_posY--;
-        snake_poss_arr[0][0] = head_posX;
-        snake_poss_arr[1][0] = head_posY;
+        move_pos_array();
 
         if (allow_clear_tail == true)
         {
@@ -1268,40 +1233,15 @@ void snake()
         }
       }
     }
-    if (turn_amount >= 3)
+    for (int id = 3; id < 400; id++)
     {
-      for (int id = 1; id < length; id++)
+      if (head_posX == snake_pos_arr[0][id] && head_posY == snake_pos_arr[1][id])
       {
-        /*
-        Serial.print("[1]");
-        Serial.print('[');
-        Serial.print(id);
-        Serial.print("] = ");
-        Serial.print(snake_poss_arr[1][id]);
-        Serial.print("                ");
-        Serial.println(head_posY);
-        Serial.print("[0]");
-        Serial.print('[');
-        Serial.print(id);
-        Serial.print("] = ");
-        Serial.print(snake_poss_arr[0][id]);
-        Serial.print("                ");
-        Serial.println(head_posX);
-        */
-
-        if (snake_poss_arr[0][0] == snake_poss_arr[0][id])
-        {
-          if (snake_poss_arr[1][0] == snake_poss_arr[1][id])
-          {
-            snake_died = true;
-          }
-          //break;
-        }
+        snake_died = true;
       }
     }
 
-    /*
-    if (snake_poss_arr[0][1] == 127 || snake_poss_arr[1][1] == 63 || snake_poss_arr[0][1] == 0 || snake_poss_arr[1][1] == 10)
+    if (snake_pos_arr[0][0] == 127 || snake_pos_arr[1][0] == 63 || snake_pos_arr[0][0] == 0 || snake_pos_arr[1][0] == 10)
     {
       snake_died = true;
     }
@@ -1315,7 +1255,6 @@ void snake()
     {
       snake_died = true;
     }
-    */
 
     if (snake_died == true)  //if (pizdets == true)
     {
@@ -1359,7 +1298,7 @@ void snake()
           apple_posY = random(20, 55);
           direction = 1;  // 1 - right; 2 - left; 3 - down; 4 - up
 
-          for (byte id = 0; id <= 39; id++)
+          for (int id = 0; id <= 39; id++)
           {
             turn_pos_arr[0][id] = 0;
             turn_pos_arr[1][id] = 0;
@@ -1369,10 +1308,13 @@ void snake()
           turn_array_id = 0;
           allow_clear_tail = true;
 
-          tail_posX = 11;
-          tail_posY = 30;
-          head_posX = length + tail_posX;  //11
-          head_posY = 30;
+          snake_died = false;
+          direction = 1;
+
+          tail_posX = 10;
+          tail_posY = 20;
+          head_posX = 20;
+          head_posY = 20;
           tail_dir = 1;
           oled.clear();
           oled.rect(0, 10, 127, 63, OLED_STROKE);
@@ -1380,38 +1322,26 @@ void snake()
           oled.print("Skore: ");
           oled.print(length - 10);
           oled.update();
-          snake_died = false;
-
-          byte rewrite_id = 0;
-          snake_poss_arr[0][0] = 5;
-          snake_poss_arr[0][rewrite_id++] = 5;
-          snake_poss_arr[0][rewrite_id++] = 5;
-          snake_poss_arr[0][rewrite_id++] = 5;
-          snake_poss_arr[0][rewrite_id++] = 5;
-
-          rewrite_id = 0;
-          snake_poss_arr[1][0] = 11;
-          snake_poss_arr[1][rewrite_id++] = 11;
-          snake_poss_arr[1][rewrite_id++] = 11;
-          snake_poss_arr[1][rewrite_id++] = 11;
-          snake_poss_arr[1][rewrite_id++] = 11;
           break;
         }
         if (left.click())
         {
+          snake_died = false;
           exit_to_menu = true;
           break;
         }
       }
     }
+    
     if (exit_to_menu == true)
     {
       menu();
       break;
     }
+    
     if (turn_amount == 0)
     {
-      for (byte id = 1; id <= 39; id++)
+      for (int id = 1; id <= 39; id++)
       {
         turn_pos_arr[0][id] = 0;
         turn_pos_arr[1][id] = 0;
@@ -1477,7 +1407,7 @@ void snake()
     }
     if (tail_posX == turn_pos_arr[0][1] && tail_posY == turn_pos_arr[1][1])
     {
-      for (byte id = 1; id <= turn_array_id + 1; id++)
+      for (int id = 1; id <= turn_array_id + 1; id++)
       {
         turn_pos_arr[0][id] = turn_pos_arr[0][id + 1];
         turn_pos_arr[1][id] = turn_pos_arr[1][id + 1];
@@ -1489,11 +1419,40 @@ void snake()
       turn_amount--;
       tail_dir = next_tail_dir[1];
 
-      for (byte id = 1; id <= turn_array_id + 1; id++)
+      for (int id = 1; id <= turn_array_id + 1; id++)
       {
         next_tail_dir[id] = next_tail_dir[id + 1];
       }
       allow_next_click = true;
+    }
+  }
+}
+
+void move_pos_array(void)
+{
+  if (length < 449)
+  {
+    for (byte id = 0; id < 2; id++)
+    {
+      for (int id2 = 449; id2 > 0; id2--)
+      {
+        snake_pos_arr[id][id2] = snake_pos_arr[id][id2 - 1];
+      }
+    }
+    if (allow_clear_tail == true)
+    {
+      for (byte id = 0; id < 2; id++)
+      {
+        for (int id2 = 449; id2 > length; id2--)
+        {
+          snake_pos_arr[id][id2] = 0;
+        }
+        snake_pos_arr[id][0] = (id == 0) ? head_posX : head_posY;
+      }
+    }
+    else
+    {
+      allow_clear_tail = true;
     }
   }
 }

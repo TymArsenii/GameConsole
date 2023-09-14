@@ -940,7 +940,7 @@ const uint8_t game_over[] PROGMEM = {
     0x00,
 };  //71x41
 
-int length = 30;
+int length = 10;
 int posX, posY;
 int apple_posX = random(10, 119), apple_posY = random(20, 55);
 int direction = 1;  // 1 - right; 2 - left; 3 - down; 4 - up
@@ -1053,6 +1053,7 @@ void snake()
   while (true)
   {
     //Serial.println(mode);
+    global_loop();
     buttons_tick();
 
     if (ok.click())
@@ -1063,14 +1064,13 @@ void snake()
     {
       pause = false;
     }
-    /*
+
     if (left.click() && pause == true)
     {
       menu;
       return;
       break;
     }
-    */
 
     if (millis() - refresh_timer >= 1000 / 30)  //1000 / REFRESH_RATE
     {
@@ -1078,9 +1078,9 @@ void snake()
       oled.clear();
       if (pause == true)
       {
-        oled.textMode(BUF_ADD);
         oled.roundRect(0, 10, 127, 40, OLED_CLEAR);
-        oled.roundRect(0, 10, 127, 40, OLED_STROKE);
+        //oled.roundRect(0, 10, 127, 40, OLED_STROKE);
+        oled.textMode(BUF_ADD);
         oled.setScale(2);
         oled.setCursor(35, 2);
         oled.print("PAUSE");
@@ -1117,6 +1117,7 @@ void snake()
       {
         oled.dot(snake_pos_arr[0][id], snake_pos_arr[1][id], 1);
       }
+      draw_battery(battery_charge);
       oled.update();
     }
 
@@ -1289,6 +1290,9 @@ void snake()
       while (true)
       {
         buttons_tick();
+        oled.textMode(BUF_REPLACE);
+        draw_battery(battery_charge);
+        oled.update();
         if (right.click())
         {
           length = 10;
@@ -1318,6 +1322,7 @@ void snake()
           tail_dir = 1;
           oled.clear();
           oled.rect(0, 10, 127, 63, OLED_STROKE);
+          
           oled.home();
           oled.print("Skore: ");
           oled.print(length - 10);
@@ -1332,13 +1337,13 @@ void snake()
         }
       }
     }
-    
+
     if (exit_to_menu == true)
     {
       menu();
       break;
     }
-    
+
     if (turn_amount == 0)
     {
       for (int id = 1; id <= 39; id++)

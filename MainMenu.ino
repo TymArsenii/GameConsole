@@ -6,6 +6,7 @@ byte row_y_pos_arr[] = {11, 22, 33, 44, 55};
 void menu()
 {
   buttons_tick();
+  down.setStepTimeout(200);
 
   if (millis() - refresh_timer >= 1000 / REFRESH_RATE)
   {
@@ -14,7 +15,6 @@ void menu()
     refresh_timer = millis();
     oled.setScale(1);
     byte start_x = 5;
-    byte start_y = 0;
     oled.textMode(BUF_ADD);
 
     oled.setCursorXY(start_x, row_y_pos_arr[0]);
@@ -23,19 +23,11 @@ void menu()
     oled.print("Google dino");
     oled.setCursorXY(start_x, row_y_pos_arr[2]);
     oled.print("Pong");
-    /*
-    oled.setCursorXY(start_x, row_y_pos_arr[2]);
-    oled.print("Google dino");
-    oled.setCursorXY(start_x, row_y_pos_arr[3]);
-    oled.print("Google dino");
-    oled.setCursorXY(start_x, row_y_pos_arr[4]);
-    oled.print("Google dino");
-    */
 
     pointer_print(pointer);
     oled.update();
   }
-  if (down.click())
+  if (down.press() || down.step())
   {
     pointer++;
 
@@ -44,7 +36,7 @@ void menu()
       pointer = APPS_AMOUNT;
     }
   }
-  if (up.click())
+  if (up.press() || up.step())
   {
     pointer--;
 
@@ -53,20 +45,21 @@ void menu()
       pointer = 1;
     }
   }
-  if (ok.click())
+  if (ok.click() || right.click())
   {
-    if (pointer == 1)
+    switch (pointer)
     {
-      snake();
-    }
-    else if (pointer == 2)
-    {
-      google_dino();
+      case 1:
+        snake();
+        break;
+      case 2:
+        google_dino();
+        break;
+      case 3:
+        pong();
+        break;
     }
   }
 }
 
-void pointer_print(int line) 
-{ 
-  oled.roundRect(0, row_y_pos_arr[line-1]-2, 127, row_y_pos_arr[line-1]+8, OLED_STROKE); 
-}
+void pointer_print(int line) { oled.roundRect(0, row_y_pos_arr[line - 1] - 2, 127, row_y_pos_arr[line - 1] + 8, OLED_STROKE); }

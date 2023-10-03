@@ -281,12 +281,17 @@ void pong()
         side ? move_x = -move_x : move_x = move_x;
 
         ball_pos[0] = 64;
-        ball_pos[1] = 32;
+        ball_pos[1] = random(15, 60);
 
         my_rocket_pos = 31;
         enemy_rocket_pos = 31;
         if (pong_my_count >= 10)
         {
+          oled.home();
+          oled.setScale(1);
+          oled.print(pong_my_count);
+          oled.print(":");
+          oled.print(pong_enemy_count);
           oled.textMode(BUF_ADD);
           oled.roundRect(0, 10, 127, 40, OLED_CLEAR);
           oled.roundRect(0, 10, 127, 40, OLED_STROKE);
@@ -321,7 +326,7 @@ void pong()
               pause = false;
 
               ball_pos[0] = 64;
-              ball_pos[1] = 32;
+              ball_pos[1] = random(15, 60);
               pong_enemy_count = 0;
               pong_my_count = 0;
               break;
@@ -352,7 +357,7 @@ void pong()
         side ? move_x = -move_x : move_x = move_x;
 
         ball_pos[0] = 64;
-        ball_pos[1] = 32;
+        ball_pos[1] = random(15, 60);
 
         my_rocket_pos = 31;
         enemy_rocket_pos = 31;
@@ -360,6 +365,11 @@ void pong()
 
         if (pong_enemy_count >= 10)
         {
+          oled.home();
+          oled.setScale(1);
+          oled.print(pong_my_count);
+          oled.print(":");
+          oled.print(pong_enemy_count);
           oled.textMode(BUF_ADD);
           oled.roundRect(0, 10, 127, 40, OLED_CLEAR);
           oled.roundRect(0, 10, 127, 40, OLED_STROKE);

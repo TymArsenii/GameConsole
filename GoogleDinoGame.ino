@@ -457,7 +457,7 @@ const uint8_t dino_way[] PROGMEM = {
     0x01,
     0x01,
     0x01,
-};  //128x1 - Dino way
+};  // 128x1 - Dino way
 const uint8_t dino_logo[] PROGMEM = {
     0xF8,
     0x0C,
@@ -1044,7 +1044,7 @@ const uint8_t dino_logo[] PROGMEM = {
     0x03,
     0x01,
     0x00,
-};  //117x35 - Dino logo
+};  // 117x35 - Dino logo
 const uint8_t dino_mirrored[] PROGMEM = {
     0x0E,
     0x2F,
@@ -1076,7 +1076,7 @@ const uint8_t dino_mirrored[] PROGMEM = {
     0x0F,
     0x07,
     0x03,
-};  //16x16 - Dino mirrored
+};  // 16x16 - Dino mirrored
 const uint8_t dino_normal[] PROGMEM = {
     0xE0,
     0x80,
@@ -1108,10 +1108,29 @@ const uint8_t dino_normal[] PROGMEM = {
     0x00,
     0x00,
     0x00,
-};  //16x16 - Dino normal
+};  // 16x16 - Dino normal
+const uint8_t heard_filled[] PROGMEM = {
+    0x0E,
+    0x1F,
+    0x3F,
+    0x7E,
+    0x3F,
+    0x1F,
+    0x0E,
+};  // 7x7 - Heard filled
+const uint8_t heard_contour[] PROGMEM = {
+    0x0E,
+    0x11,
+    0x21,
+    0x42,
+    0x21,
+    0x11,
+    0x0E,
+};  // 7x7 - Heard contour
 
 #define DINO_GRAVITY 0.175f
 #define DINO_GROUND 47  //px
+#define DINO_WIN_GOAL 1000
 
 bool dino_feet;
 bool dino_move_direction;
@@ -1131,6 +1150,9 @@ int hi_dino_skore = 905;
 bool dino_night;
 int game_speed = 100;
 int new_enemy_delay = 0;
+bool dino_stand_normal;
+bool heard_type;
+byte text_type;
 
 void google_dino()
 {
@@ -1144,6 +1166,8 @@ void google_dino()
   uint32_t skore_timer;
   uint32_t new_enemy_timer = millis();
   uint32_t speed_timer;
+  uint32_t heard_timer;
+  uint32_t text_timer;
 
   exit_to_menu = false;
 
@@ -1152,6 +1176,7 @@ void google_dino()
   dino_died = false;
   enemy_pos = -25;
   new_enemy_delay = 800;
+  dino_stand_normal = false;
 
   oled.clear();
   oled.roundRect(0, 9, 127, 40, OLED_STROKE);
@@ -1182,11 +1207,22 @@ void google_dino()
 
   while (true)
   {
+    draw_battery(battery_charge);
+    oled.update();
     buttons_tick();
-    if (right.click())
+    if (right.click() || ok.click())
     {
       dino_died = false;
       enemy_pos = -25;
+      dino_stand_normal = false;
+      text_type = 0;
+      pause = false;
+      dino_skore = 0;
+      text_type = 0;
+      dino_stand_normal = false;
+      game_speed = 100;
+      active_enemy_id = 1;
+
       Timer5.setFrequency(100);
       Timer5.enableISR();
       break;
@@ -1215,7 +1251,7 @@ void google_dino()
     }
     if (left.click() && pause == true)
     {
-      menu;
+      menu();
       return;
       break;
     }
@@ -1262,9 +1298,45 @@ void google_dino()
 
       if (dino_died == false)
       {
-        if (roached == false)
+        if (roached == false && dino_stand_normal == false)
         {
-          oled.drawBitmap(5, dino_height, dino_feet ? dino_left : dino_right, 15, 16);
+          if (dino_height == DINO_GROUND)
+          {
+            oled.drawBitmap(5, dino_height, dino_feet ? dino_left : dino_right, 15, 16);
+          }
+          else
+          {
+            oled.drawBitmap(5, dino_height, dino_normal, 15, 16);
+          }
+        }
+        else if (roached == false && dino_stand_normal == true)
+        {
+          oled.drawBitmap(5, dino_height, dino_normal, 15, 16);
+          oled.drawBitmap(18, dino_height - 10, heard_type ? heard_filled : heard_contour, 7, 7);
+          oled.setCursor(1, 2);
+          oled.autoPrintln(true);
+
+          switch (text_type)
+          {
+            case 1:
+              oled.print("True love have to beachieved");
+              break;
+            case 2:
+              oled.print("Dino passed along   way to see his love");
+              break;
+            default:
+              oled.print("Wish you love and beloved!");
+
+              oled.setCursor(89, 6);
+              oled.print("MENU");
+              oled.setCursor(120, 6);
+              oled.print("-");
+              oled.setCursorXY(115, 48);
+              oled.print("-");
+              oled.setCursorXY(115, 48);
+              oled.print("<");
+              break;
+          }
         }
         else
         {
@@ -1288,10 +1360,17 @@ void google_dino()
         case 3:
           oled.drawBitmap(enemy_pos, DINO_GROUND - 12, bird_wings_type ? birdR : birdL, 24, 16);
           break;
+        case 4:
+          oled.drawBitmap(enemy_pos, DINO_GROUND, dino_mirrored, 15, 16);
+          break;
       }
       draw_battery(battery_charge);
       if (dino_died == true)
       {
+        tone(12, 200, 50);
+        delay(100);
+        tone(12, 200, 50);
+
         oled.textMode(BUF_ADD);
         oled.roundRect(0, 10, 127, 40, OLED_CLEAR);
         oled.roundRect(0, 10, 127, 40, OLED_STROKE);
@@ -1324,7 +1403,7 @@ void google_dino()
           buttons_tick();
           oled.textMode(BUF_REPLACE);
           draw_battery(battery_charge);
-          if (right.click())
+          if (right.click() || ok.click())
           {
             dino_height = BOTTOM_HEIGHT;
             dino_jump_timer = millis();
@@ -1341,6 +1420,7 @@ void google_dino()
             game_speed = 100;
             enemy_pos = -25;
             new_enemy_delay = 700;
+            dino_stand_normal = false;
             break;
           }
           if (left.click())
@@ -1363,12 +1443,30 @@ void google_dino()
     if (millis() - skore_timer >= 100 && pause != true)
     {
       skore_timer = millis();
-      dino_skore++;
+      if (dino_stand_normal != true)
+      {
+        dino_skore++;
+      }
     }
-    if (millis() - speed_timer > 800)
+
+    if (dino_stand_normal == true && millis() - text_timer >= 2500)
+    {
+      text_timer = millis();
+      if (text_type < 3)
+      {
+        text_type++;
+      }
+    }
+    if (millis() - heard_timer >= 500)
+    {
+      heard_timer = millis();
+      heard_type = !heard_type;
+    }
+    if (millis() - speed_timer > 800 && pause != true)
     {
       speed_timer = millis();
-      if (game_speed < 200)
+
+      if (game_speed < 190)
       {
         game_speed++;
         if (pause != true)
@@ -1377,6 +1475,11 @@ void google_dino()
           Timer5.enableISR();
         }
       }
+    }
+    if (left.click() && text_type == 3)
+    {
+      menu();
+      break;
     }
     if (millis() - dino_step_timer >= 110 && pause != true)
     {
@@ -1391,27 +1494,35 @@ void google_dino()
     if (no_enemies == true && millis() - new_enemy_timer >= new_enemy_delay && pause != true)
     {
       new_enemy_timer = millis();
-      active_enemy_id = 0;
-      no_enemies = false;
-      if (dino_skore >= 120 && active_enemy_id != 3)
+      if (dino_skore < DINO_WIN_GOAL + 10)
       {
-        active_enemy_id = random(1, 4);  // 1 - small cactus; 2 - big cactus; 3 - bird
-        if (active_enemy_id == 3)
+        active_enemy_id = 0;
+        no_enemies = false;
+        if (dino_skore >= 120 && active_enemy_id != 3)
         {
-          new_enemy_delay = 1700;
+          active_enemy_id = random(1, 4);  // 1 - small cactus; 2 - big cactus; 3 - bird
+          if (active_enemy_id == 3)
+          {
+            new_enemy_delay = 1700;
+          }
+          else
+          {
+            new_enemy_delay = 0;
+          }
         }
         else
         {
+          active_enemy_id = random(1, 3);  // 1 - small cactus; 2 - big cactus; 3 - bird
           new_enemy_delay = 0;
         }
       }
-      else
+      else if (no_enemies == true)
       {
-        active_enemy_id = random(1, 3);  // 1 - small cactus; 2 - big cactus; 3 - bird
-        new_enemy_delay = 0;
+        active_enemy_id = 4;
+        no_enemies = false;
       }
       //active_enemy_id = 1;
-      if (active_enemy_id == 1)
+      if (active_enemy_id == 1 || active_enemy_id == 4)
         enemy_pos = 144;
       if (active_enemy_id == 2 || active_enemy_id == 3)
         enemy_pos = 152;
@@ -1451,26 +1562,30 @@ void google_dino()
       }
     }
 
-    if (up.click() && dino_height == DINO_GROUND && dino_died == false && pause != true)
+    if (dino_stand_normal == false && active_enemy_id != 4)
     {
-      dino_speed = -2.8;
-      dino_height -= 4;
+      if (up.click() && dino_height == DINO_GROUND && dino_died == false && pause != true)
+      {
+        dino_speed = -2.8;
+        dino_height -= 4;
+        tone(12, 450, 50);
+      }
+      else if ((up.holding()) && dino_height == DINO_GROUND && dino_died == false && pause != true)
+      {
+        dino_speed = -3.0;
+        dino_height -= 4.5;
+        tone(12, 450, 50);
+      }
+      if (down.pressing() && dino_died == false && pause != true)
+      {
+        roached = true;
+        dino_height = DINO_GROUND;
+      }
+      if (!down.pressing())
+      {
+        roached = false;
+      }
     }
-    else if ((up.holding()) && dino_height == DINO_GROUND && dino_died == false && pause != true)
-    {
-      dino_speed = -3.3;
-      dino_height -= 5;
-    }
-    if (down.pressing() && dino_died == false && pause != true)
-    {
-      roached = true;
-      dino_height = DINO_GROUND;
-    }
-    if (!down.pressing())
-    {
-      roached = false;
-    }
-
     if (millis() - dino_jump_timer >= 15)
     {
       dino_jump_timer = millis();
@@ -1490,12 +1605,25 @@ void google_dino()
 
 ISR(TIMER5_A)
 {
-  if (enemy_pos >= -24)
+  if (enemy_pos >= -24 && active_enemy_id != 4)
   {
     enemy_pos--;
   }
-  else
+  else if (active_enemy_id != 4)
   {
     no_enemies = true;
+  }
+
+  if (dino_skore >= DINO_WIN_GOAL && active_enemy_id == 4)
+  {
+    if (enemy_pos >= 25)
+    {
+      enemy_pos--;
+    }
+    else
+    {
+      dino_stand_normal = true;
+      pause = false;
+    }
   }
 }

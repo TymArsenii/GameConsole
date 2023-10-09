@@ -1145,7 +1145,6 @@ bool bird_wings_type;
 int enemy_pos = -25;  //x
 bool dino_died;
 int dino_skore;
-int hi_dino_skore = 905;
 //int night_day_change[] = {20, 60, 100, 200, 300, 400, 600, 900, 1000, 1300, 1500, 1900, 2000, 2200};
 bool dino_night;
 int game_speed = 100;
@@ -1168,6 +1167,12 @@ void google_dino()
   uint32_t speed_timer;
   uint32_t heard_timer;
   uint32_t text_timer;
+
+  up.setHoldTimeout(90);
+  down.setHoldTimeout(90);
+  ok.setHoldTimeout(1000);
+  left.setHoldTimeout(100);
+  right.setHoldTimeout(100);
 
   exit_to_menu = false;
 
@@ -1205,6 +1210,12 @@ void google_dino()
   oled.drawBitmap(94, 14, birdL, 24, 16);
   oled.update();
 
+  up.setHoldTimeout(1000);
+  down.setHoldTimeout(1000);
+  ok.setHoldTimeout(1000);
+  left.setHoldTimeout(1000);
+  right.setHoldTimeout(1000);
+
   while (true)
   {
     draw_battery(battery_charge);
@@ -1229,7 +1240,7 @@ void google_dino()
     }
     if (left.click())
     {
-      menu();
+      games_menu();
       return;
       break;
     }
@@ -1242,6 +1253,22 @@ void google_dino()
     if (ok.click())
     {
       pause = !pause;
+      if (pause == true)
+      {
+        up.setHoldTimeout(1000);
+        down.setHoldTimeout(1000);
+        ok.setHoldTimeout(1000);
+        left.setHoldTimeout(1000);
+        right.setHoldTimeout(1000);
+      }
+      else
+      {
+        up.setHoldTimeout(90);
+        down.setHoldTimeout(90);
+        ok.setHoldTimeout(1000);
+        left.setHoldTimeout(90);
+        right.setHoldTimeout(90);
+      }
       Timer5.setFrequency(80);
       Timer5.enableISR();
     }
@@ -1251,9 +1278,32 @@ void google_dino()
     }
     if (left.click() && pause == true)
     {
-      menu();
+      int eeprom_check;
+      EEPROM.get(5, eeprom_check);
+      if (eeprom_check < dino_skore)
+      {
+        EEPROM.put(5, dino_skore);
+      }
+      games_menu();
       return;
       break;
+    }
+
+    if (pause == true)
+    {
+      up.setHoldTimeout(1000);
+      down.setHoldTimeout(1000);
+      ok.setHoldTimeout(1000);
+      left.setHoldTimeout(1000);
+      right.setHoldTimeout(1000);
+    }
+    else
+    {
+      up.setHoldTimeout(90);
+      down.setHoldTimeout(90);
+      ok.setHoldTimeout(1000);
+      left.setHoldTimeout(90);
+      right.setHoldTimeout(90);
     }
 
     if (millis() - refresh_timer >= 1000 / REFRESH_RATE)
@@ -1367,9 +1417,12 @@ void google_dino()
       draw_battery(battery_charge);
       if (dino_died == true)
       {
-        tone(12, 200, 50);
-        delay(100);
-        tone(12, 200, 50);
+        if (beep_is_active == true)
+        {
+          tone(12, 200, 50);
+          delay(100);
+          tone(12, 200, 50);
+        }
 
         oled.textMode(BUF_ADD);
         oled.roundRect(0, 10, 127, 40, OLED_CLEAR);
@@ -1398,6 +1451,13 @@ void google_dino()
         oled.setCursorXY(115, 32);
         oled.print("-");
         oled.update();
+
+        up.setHoldTimeout(1000);
+        down.setHoldTimeout(1000);
+        ok.setHoldTimeout(1000);
+        left.setHoldTimeout(1000);
+        right.setHoldTimeout(1000);
+
         while (true)
         {
           buttons_tick();
@@ -1435,9 +1495,20 @@ void google_dino()
         oled.update();
       }
     }
+    if (hi_dino_skore < dino_skore)
+    {
+      hi_dino_skore = dino_skore;
+    }
     if (exit_to_menu == true)
     {
-      menu();
+      int eeprom_check;
+      EEPROM.get(5, eeprom_check);
+      if (eeprom_check < dino_skore)
+      {
+        EEPROM.put(5, dino_skore);
+      }
+      games_menu();
+
       break;
     }
     if (millis() - skore_timer >= 100 && pause != true)
@@ -1478,7 +1549,14 @@ void google_dino()
     }
     if (left.click() && text_type == 3)
     {
-      menu();
+      int eeprom_check;
+      EEPROM.get(5, eeprom_check);
+      if (eeprom_check < dino_skore)
+      {
+        EEPROM.put(5, dino_skore);
+      }
+      games_menu();
+
       break;
     }
     if (millis() - dino_step_timer >= 110 && pause != true)
@@ -1568,13 +1646,19 @@ void google_dino()
       {
         dino_speed = -2.8;
         dino_height -= 4;
-        tone(12, 450, 50);
+        if (beep_is_active == true)
+        {
+          tone(12, 450, 50);
+        }
       }
       else if ((up.holding()) && dino_height == DINO_GROUND && dino_died == false && pause != true)
       {
         dino_speed = -3.0;
         dino_height -= 4.5;
-        tone(12, 450, 50);
+        if (beep_is_active == true)
+        {
+          tone(12, 450, 50);
+        }
       }
       if (down.pressing() && dino_died == false && pause != true)
       {

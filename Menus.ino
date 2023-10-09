@@ -149,7 +149,7 @@ void games_menu()
       pointer = 1;
     }
   }
-  if (left.press())
+  if (left.click())
   {
     menu_active = 1;
   }

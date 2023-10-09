@@ -21,7 +21,7 @@ void about()
       oled.print("Made by:                Arsenii Tymoshenko");
       oled.update();
     }
-    if (left.press())
+    if (left.click())
     {
       menu_active = 1;
       return;

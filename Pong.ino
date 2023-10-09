@@ -23,12 +23,18 @@ void pong()
   uint32_t ai_timer;
   uint32_t ball_angle_timer;
 
+  up.setHoldTimeout(60);
+  down.setHoldTimeout(60);
+  ok.setHoldTimeout(1000);
+  left.setHoldTimeout(60);
+  right.setHoldTimeout(60);
+
   up.setStepTimeout(60);
   down.setStepTimeout(60);
 
   oled.clear();
   oled.roundRect(0, 9, 127, 40, OLED_STROKE);
-  oled.setCursorXY(20, 45);
+  oled.setCursorXY(15, 45);
   oled.print(F("WIN GOAL: 10:10"));
   oled.setScale(1);
   oled.setCursor(3, 7);
@@ -74,7 +80,7 @@ void pong()
     {
       up.setStepTimeout(200);
       down.setStepTimeout(200);
-      menu();
+      games_menu();
       return;
       break;
     }
@@ -92,11 +98,28 @@ void pong()
     {
       pause = false;
     }
+
+    if (pause == true)
+    {
+      up.setHoldTimeout(1000);
+      down.setHoldTimeout(1000);
+      ok.setHoldTimeout(1000);
+      left.setHoldTimeout(1000);
+      right.setHoldTimeout(1000);
+    }
+    else
+    {
+      up.setHoldTimeout(60);
+      down.setHoldTimeout(60);
+      ok.setHoldTimeout(1000);
+      left.setHoldTimeout(60);
+      right.setHoldTimeout(60);
+    }
     if (left.click() && pause == true)
     {
       up.setStepTimeout(200);
       down.setStepTimeout(200);
-      menu();
+      games_menu();
       return;
       break;
     }
@@ -175,7 +198,10 @@ void pong()
           {
             if (my_rocket_pos + id == ball_pos[1])
             {
-              tone(12, 450, 50);
+              if (beep_is_active == true)
+              {
+                tone(12, 450, 50);
+              }
               if (id < 2)
               {
                 move_x = 3;
@@ -218,7 +244,10 @@ void pong()
           {
             if (enemy_rocket_pos + id == ball_pos[1])
             {
-              tone(12, 450, 50);
+              if (beep_is_active == true)
+              {
+                tone(12, 450, 50);
+              }
               if (id < 2)
               {
                 move_x = 3;
@@ -264,12 +293,14 @@ void pong()
         int melody[] = {NOTE_E7, NOTE_B6, NOTE_G6, NOTE_D7, NOTE_E7, NOTE_FS7, NOTE_G7, NOTE_A7};
         int noteDurations[] = {150, 150, 150, 150, 150, 150, 150, 300};
 
-        // Play the winner melody
-        for (int i = 0; i < sizeof(melody) / sizeof(melody[0]); i++)
+        if (beep_is_active == true)
         {
-          tone(12, melody[i], noteDurations[i]);
-          delay(noteDurations[i]);
-          noTone(12);
+          for (int i = 0; i < sizeof(melody) / sizeof(melody[0]); i++)
+          {
+            tone(12, melody[i], noteDurations[i]);
+            delay(noteDurations[i]);
+            noTone(12);
+          }
         }
         pong_my_count++;
 
@@ -316,6 +347,12 @@ void pong()
           oled.setCursorXY(115, 32);
           oled.print("-");
           oled.update();
+
+          up.setHoldTimeout(1000);
+          down.setHoldTimeout(1000);
+          ok.setHoldTimeout(1000);
+          left.setHoldTimeout(1000);
+          right.setHoldTimeout(1000);
           while (true)
           {
             buttons_tick();
@@ -335,7 +372,7 @@ void pong()
             {
               up.setStepTimeout(200);
               down.setStepTimeout(200);
-              menu();
+              games_menu();
               return;
               break;
             }
@@ -344,9 +381,12 @@ void pong()
       }
       if (ball_pos[0] < 0 + X_OFFSET)
       {
-        tone(12, 250, 200);
-        delay(200);
-        tone(12, 70, 350);
+        if (beep_is_active == true)
+        {
+          tone(12, 250, 200);
+          delay(200);
+          tone(12, 70, 350);
+        }
         pong_enemy_count++;
 
         move_x = 1;
@@ -394,6 +434,11 @@ void pong()
           oled.setCursorXY(115, 32);
           oled.print("-");
           oled.update();
+          up.setHoldTimeout(1000);
+          down.setHoldTimeout(1000);
+          ok.setHoldTimeout(1000);
+          left.setHoldTimeout(1000);
+          right.setHoldTimeout(1000);
           while (true)
           {
             buttons_tick();
@@ -413,7 +458,7 @@ void pong()
             {
               up.setStepTimeout(200);
               down.setStepTimeout(200);
-              menu();
+              games_menu();
               return;
               break;
             }
